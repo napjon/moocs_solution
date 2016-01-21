@@ -1,0 +1,214 @@
+Create a histogram of diamond prices.
+Facet the histogram by diamond color
+and use cut to color the histogram bars.
+
+The plot should look something like this.
+http://i.imgur.com/b5xyrOu.jpg
+
+Note: In the link, a color palette of type
+'qual' was used to color the histogram using
+scale_fill_brewer(type = 'qual')
+
+This assignment is not graded and
+will be marked as correct when you submit.
+
+
+```{r}
+
+library(ggplot2)
+data(diamonds)
+
+ggplot(aes(x=price),
+       data = diamonds)+
+  facet_wrap(~color)+
+  geom_histogram(aes(fill=cut))+
+  scale_fill_brewer(type='qual')
+```
+
+Create a scatterplot of diamond price vs.
+table and color the points by the cut of
+the diamond.
+
+The plot should look something like this.
+http://i.imgur.com/rQF9jQr.jpg
+
+Note: In the link, a color palette of type
+'qual' was used to color the scatterplot using
+scale_color_brewer(type = 'qual')
+```{r}
+str(diamonds)
+ggplot(aes(x=table,y=price),
+       data = diamonds)+
+  geom_point(aes(color=cut))+
+  scale_color_brewer(type='qual')
+```
+
+The discrete will shows that ideal 53-57, premium 58-62
+
+
+
+
+Create a scatterplot of diamond price vs.
+volume (x * y * z) and color the points by
+the clarity of diamonds. Use scale on the y-axis
+to take the log10 of price. You should also
+omit the top 1% of diamond volumes from the plot.
+
+Note: Volume is a very rough approximation of
+a diamond's actual volume.
+
+The plot should look something like this.
+http://i.imgur.com/excUpea.jpg
+```{r}
+
+diamonds <- transform(diamonds,volume=x*y*z)
+ggplot(aes(x=volume,y=price),
+       data=diamonds)+
+  geom_point(aes(color=clarity))+
+  scale_y_log10()+
+  xlim(0,quantile(diamonds$volume,0.99))+
+  scale_color_brewer(type='div')
+```
+
+
+Many interesting variables are derived from two or more others.
+For example, we might wonder how much of a person's network on
+a service like Facebook the user actively initiated. Two users
+with the same degree (or number of friends) might be very
+different if one initiated most of those connections on the
+service, while the other initiated very few. So it could be
+useful to consider this proportion of existing friendships that
+the user initiated. This might be a good predictor of how active
+a user is compared with their peers, or other traits, such as
+personality (i.e., is this person an extrovert?).
+
+Your task is to create a new variable called 'prop_initiated'
+in the Pseudo-Facebook data set. The variable should contain
+the proportion of friendships that the user initiated.
+```{r}
+pf <- read.csv('../lesson3/pseudo_facebook.tsv',sep='\t')
+names(pf)
+pf <- transform(pf, prop_initiated=friendships_initiated/friend_count)
+```
+
+
+
+Create a line graph of the proportion of
+friendships initiated ('prop_initiated') vs.
+tenure and color the line segment by
+year_joined.bucket.
+
+Recall, we created year_joined.bucket in Lesson 5
+by first creating year_joined from the variable tenure.
+Then, we used the cut function on year_joined to create
+four bins or cohorts of users.
+
+(2004, 2009]
+(2009, 2011]
+(2011, 2012]
+(2012, 2014]
+```{r}
+pf <- transform(pf,year_joined=floor(2014-tenure/365))
+pf <- transform(pf, year_joined.bucket = cut(year_joined,c(2004,2009,2011,2012,2014)))
+table(pf$year_joined.bucket)
+
+ggplot(aes(x=tenure,y=prop_initiated),
+       data=pf)+
+  geom_line(aes(color=year_joined.bucket),
+            stat="summary",
+            fun.y = median)
+```
+
+
+Smooth the last plot you created of
+of prop_initiated vs tenure colored by
+year_joined.bucket. You can use larger
+bins for tenure or add a smoother to the plot.
+
+There won't be a solution image for this exercise.
+You will answer some questions about your plot in
+the next two exercises.
+```{r}
+ggplot(aes(x=tenure,y=prop_initiated),
+       data=pf)+
+  geom_smooth(aes(color=year_joined.bucket))
+summary(pf$year_joined.bucket)
+```
+
+
+```{r}
+summary(subset(pf,year_joined.bucket == '(2012,2014]')$prop_initiated)
+```
+
+* Because people with late join, tends to have friends that already on facebook. So they're catching up by invite their friends
+* When they first join, they were asked to invite friends that they do know, instead earlier when facebook didn't implement such system.
+* Facebook has become very famous, and sort of de facto standard for social network. Nonetheless, people (must) use facebook for engaging their network
+* Like google, many apps nowadays in smartphone using facebook account to quickly login into their account.
+
+****
+
+Create a scatter plot of the price/carat ratio
+of diamonds. The variable x should be
+assigned to cut. The points should be colored
+by diamond color, and the plot should be
+faceted by clarity.
+
+The plot should look something like this.
+http://i.imgur.com/YzbWkHT.jpg.
+
+Note: In the link, a color palette of type
+'div' was used to color the histogram using
+scale_color_brewer(type = 'div')
+
+```{r}
+
+ggplot(aes(x=cut, y = price/carat),
+       data=diamonds)+
+  geom_jitter(aes(color=color))+
+  facet_wrap(~clarity)+
+  scale_color_brewer(type='div')
+```
+
+Extract only ASEAN data from the dataset
+create bucket year ~1900,1900-1990,1990-2000,2000-2005
+Create time series for the data.
+Mean Age at first mariage of women
+```{r}
+library(dplyr)
+wm <- read.csv('indicator age of marriage.csv')
+
+ASEAN <- c('Indonesia','VietNam', 'Myanmar','Thailand','Singapore',
+           'Cambodia','Philippines','Brunei','Malaysia')
+bucket_year <- c(1616,1900,1990,2000,2005)
+wm_asean <- filter(wm,X %in% ASEAN )
+wm_asean <- transform(wm_asean, X=factor(X,ASEAN))
+colnames(wm_asean) <- as.numeric(substr(colnames(wm_asean),start=2,stop=5))
+colnames(wm_asean)[1] <- 'country'
+library(reshape2)
+wm_asean.long <- melt(wm_asean,
+                      id='country',
+                      value.name='Average',
+                      variable.name = 'Year',
+                      measure.vars=colnames(wm_asean)[-1])
+wm_asean.long$Year <- as.numeric(as.character(wm_asean.long$Year))
+wm_asean.long$Average[is.na(wm_asean.long$Average)] <- 0
+wm_asean.long$year_bucket <- cut(wm_asean.long$Year,
+                   breaks= bucket_year,
+                   labels=c('less than 1900',
+                        '1900-1990',
+                        '1990-2000',
+                        '2000-2005'))
+
+ggplot(aes(x=Year,y=Average),
+       data=wm_asean.long)+
+  geom_smooth(aes(color=year_bucket))+
+  facet_wrap(~country)+
+  ggsave('fmasean.jpg')
+
+```
+
+
+
+
+
+

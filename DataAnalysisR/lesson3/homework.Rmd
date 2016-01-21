@@ -1,0 +1,197 @@
+
+Observation = 53940
+variable = 10
+
+
+```{r}
+data(diamonds)
+names(diamonds)
+names(diamonds['color'])
+summary(diamonds)
+#?ordered
+#?levels
+ggplot(aes(x=price), data = diamonds) + geom_histogram()
+dim(subset(diamonds, diamonds$price >= 15000))
+ggplot(aes(x=price), data = diamonds) + geom_histogram(binwidth = 250)+
+  scale_x_continuous(breaks = seq(0,5000,250), limit = c(0,5000))
+
+```
+
+There are no diamonds that cost $1500.
+
+For diamonds that cost less than $2,000, the most common price of a diamond is around $700 with the mode being $605 (binwidth = 1). The second insight comes from Paula F. Thanks Paula!
+
+By Cut
+```{r}
+ggplot(aes(x=price), data = diamonds) + geom_histogram(binwidth = 250)+
+  scale_x_continuous(breaks = seq(0,5000,250), limit = c(0,5000)) + facet_wrap(~cut, ncol=2)
+```
+
+Question based on Cut
+```{r}
+by(diamonds$price,diamonds$cut,summary)
+
+by(diamonds$price,diamonds$cut,max)
+```
+
+# In the two last exercises, we looked at
+# the distribution for diamonds by cut.
+
+# Run the code below in R Studio to generate
+# the histogram as a reminder.
+
+# ===============================================================
+
+```{r}
+#qplot(x = price, data = diamonds) + facet_wrap(~cut, scales = "free_y") +
+ggplot(aes(x=price*carat), data = na.omit(diamonds)) + geom_histogram(binwidth = 250)+
+  facet_wrap(~cut, scales  = "free_y") + scale_x_log10()
+```
+                                                                               
+# ===============================================================
+
+
+# In the last exercise, we looked at the summary statistics
+# for diamond price by cut. If we look at the output table, the
+# the median and quartiles are reasonably close to each other.
+
+# diamonds$cut: Fair
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#     337    2050    3282    4359    5206   18570 
+# ------------------------------------------------------------------------ 
+# diamonds$cut: Good
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#     327    1145    3050    3929    5028   18790 
+# ------------------------------------------------------------------------ 
+# diamonds$cut: Very Good
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#     336     912    2648    3982    5373   18820 
+# ------------------------------------------------------------------------ 
+# diamonds$cut: Premium
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#     326    1046    3185    4584    6296   18820 
+# ------------------------------------------------------------------------ 
+# diamonds$cut: Ideal
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#     326     878    1810    3458    4678   18810 
+
+# This means the distributions should be somewhat similar,
+# but the histograms we created don't show that.
+
+# The 'Fair' and 'Good' diamonds appear to have 
+# different distributions compared to the better
+# cut diamonds. They seem somewhat uniform
+# on the left with long tails on the right.
+
+# Let's look in to this more.
+
+# Look up the documentation for facet_wrap in R Studio.
+# Then, scroll back up and add a parameter to facet_wrap so that
+# the y-axis in the histograms is not fixed. You want the y-axis to
+# be different for each histogram.
+
+# If you want a hint, check out the Instructor Notes.
+
+
+#price per carat natural log distribution and cut facet
+```{r}
+#qplot(x = price, data = diamonds) + facet_wrap(~cut, scales = "free_y") +
+ggplot(aes(x=price/carat), data = na.omit(diamonds)) + geom_histogram()+
+  facet_wrap(~cut, scales  = "free_y") + scale_x_log10()
+```
+
+#boxplot categorical
+```{r}
+ggplot(aes(x = color, y = price/carat), data = na.omit(diamonds)) + geom_boxplot()
+```
+
+#IQR
+```{r}
+IQR(subset(diamonds,price<1000)$price)
+names(diamonds)
+summary(subset(diamonds,color=='J')$price)
+IQR(subset(diamonds,color=='D')$color)
+by(diamonds$price, diamonds$color, IQR)
+```
+# Investigate the price per carat of diamonds across
+# the different colors of diamonds using boxplots.
+
+```{r}
+ggplot(aes(x = color, y = price/carat), data = diamonds) + geom_boxplot(aes(fill=color)) +
+  ggsave('pricePerCaratInColor.png')
+table(diamonds$carat)[table(diamonds$carat)>2000]
+dim(diamonds)
+subset(diamonds$carat, diamonds$carat>0.3)
+```
+weight diamonds using freq_poly
+# The Gapminder website contains over 500 data sets with information about
+# the world's population. Your task is to download a data set of your choice
+# and create 2-5 plots that make use of the techniques from Lesson 3.
+```{r}
+alco = read.csv('alcohol_indicator.csv', header=TRUE, row.names=1)
+?geom_freqpoly
+ggplot(data = alco) + 
+  geom_freqpoly(aes(color = 'Year',x = alco$X2005, y = (..count..)/sum(..count..)))+ 
+  geom_freqpoly(aes(color = 'blue',x = alco$X2008, y = (..count..)/sum(..count..)))+
+  xlab('count litre per people in a year')+
+  ylab('average drink over countries')+
+  scale_colour_manual(values = c('green','blue'),
+                      labels = c('2005','2008'))+
+  ggsave('alcoholplot.png')
+?scale_colour_manual
+```
+
+# Your task is to investigate the distribution of your friends'
+# birth months and days.
+
+# Here some questions you could answer, and we hope you think of others.
+
+# **********************************************************************
+
+
+
+
+
+
+
+# **********************************************************************
+```{r}
+library(lubridate)
+library(gridExtra)
+fbfriends = read.csv('../Lesson3/birthdaysExample.csv')
+fbfriends$gf <- mdy(fbfriends$dates)
+fbfriends$year <- year(fbfriends$gf)
+fbfriends$month <- month(fbfriends$gf)
+fbfriends$day <- day(fbfriends$gf)
+```
+# How many people share your birthday? Do you know them?
+# (Reserve time with them or save money to buy them a gift!)
+```{r}
+nrow(subset(fbfriends, fbfriends$month == 12 & fbfriends$day ==21))
+```
+# Which month contains the most number of birthdays?
+```{r}
+tbmonth = table(fbfriends$month)
+
+which(tbmonth == max(tbmonth))
+```
+
+# How many birthdays are in each month?
+```{r}
+table(fbfriends$month)
+```
+# Which day of the year has the most number of birthdays?
+```{r}
+tbday <- table(fbfriends$day)
+which(tbday== max(tbday))
+```
+# Do you have at least 365 friends that have birthdays on everyday
+# of the year?
+No
+
+```{r}
+dftbmonth = as.data.frame(tbmonth)
+plot(dftbmonth$Var1, dftbmonth$Freq)
+ggplot(aes(Var1,Freq), data = dftbmonth) + geom_point()
+```
+

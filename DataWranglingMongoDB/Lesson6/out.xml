@@ -1,0 +1,43 @@
+<osm attribution="http://www.openstreetmap.org/copyright" copyright="OpenStreetMap and contributors" generator="CGImap 0.3.3 (28791 thorn-03.openstreetmap.org)" license="http://opendatacommons.org/licenses/odbl/1-0/" version="0.6">
+ <bounds maxlat="41.9758200" maxlon="-87.6894800" minlat="41.9704500" minlon="-87.6928300" />
+ <node changeset="11129782" id="261114295" lat="41.9730791" lon="-87.6866303" timestamp="2012-03-28T18:31:23Z" uid="451048" user="bbmiller" version="7" visible="true" />
+ <node changeset="8448766" id="261114296" lat="41.9730416" lon="-87.6878512" timestamp="2011-06-15T17:04:54Z" uid="451048" user="bbmiller" version="6" visible="true" />
+ <node changeset="8581395" id="261114299" lat="41.9729565" lon="-87.6939548" timestamp="2011-06-29T14:14:14Z" uid="451048" user="bbmiller" version="5" visible="true" />
+ <node changeset="8581395" id="261146436" lat="41.9707380" lon="-87.6976025" timestamp="2011-06-29T14:14:14Z" uid="451048" user="bbmiller" version="5" visible="true" />
+ <node changeset="8581395" id="261147304" lat="41.9740068" lon="-87.6988576" timestamp="2011-06-29T14:14:15Z" uid="451048" user="bbmiller" version="7" visible="true" />
+ <node changeset="8581395" id="261224274" lat="41.9707656" lon="-87.6938669" timestamp="2011-06-29T14:14:14Z" uid="451048" user="bbmiller" version="5" visible="true" />
+ <node changeset="8448766" id="293816175" lat="41.9730154" lon="-87.6890403" timestamp="2011-06-15T16:55:37Z" uid="451048" user="bbmiller" version="47" visible="true" />
+ <node changeset="15348240" id="305896090" lat="41.9749225" lon="-87.6891198" timestamp="2013-03-13T07:46:29Z" uid="567034" user="Umbugbene" version="37" visible="true" />
+ <node changeset="15348240" id="317636974" lat="41.9740292" lon="-87.7012430" timestamp="2013-03-13T08:02:56Z" uid="567034" user="Umbugbene" version="12" visible="true" />
+ <node changeset="15348240" id="317636971" lat="41.9740556" lon="-87.6979712" timestamp="2013-03-13T08:08:01Z" uid="567034" user="Umbugbene" version="13" visible="true" />
+ <node changeset="14927972" id="317637399" lat="41.9705609" lon="-87.7012048" timestamp="2013-02-05T22:43:49Z" uid="567034" user="Umbugbene" version="2" visible="true" />
+ <node changeset="14927972" id="317637398" lat="41.9706972" lon="-87.7012109" timestamp="2013-02-05T22:43:49Z" uid="567034" user="Umbugbene" version="2" visible="true" />
+ <node changeset="8448766" id="365214872" lat="41.9731130" lon="-87.6847998" timestamp="2011-06-15T17:04:54Z" uid="451048" user="bbmiller" version="3" visible="true" />
+ <node changeset="8581395" id="261299091" lat="41.9747482" lon="-87.6988886" timestamp="2011-06-29T14:14:15Z" uid="451048" user="bbmiller" version="6" visible="true" />
+ <node changeset="8448766" id="261114294" lat="41.9731219" lon="-87.6841979" timestamp="2011-06-15T17:04:54Z" uid="451048" user="bbmiller" version="6" visible="true" />
+ <node changeset="3359748" id="261210804" lat="41.9707217" lon="-87.7000019" timestamp="2009-12-13T00:36:09Z" uid="147510" user="woodpeck_fixbot" version="4" visible="true" />
+ <node changeset="8581395" id="261221422" lat="41.9748542" lon="-87.6922652" timestamp="2011-06-29T14:14:15Z" uid="451048" user="bbmiller" version="7" visible="true" />
+ <node changeset="8581395" id="261221424" lat="41.9758794" lon="-87.6923639" timestamp="2011-06-29T14:14:15Z" uid="451048" user="bbmiller" version="7" visible="true">
+  <tag k="highway" v="traffic_signals" />
+ </node>
+ <node changeset="8581395" id="261198953" lat="41.9707413" lon="-87.6963097" timestamp="2011-06-29T14:14:13Z" uid="451048" user="bbmiller" version="6" visible="true" />
+ <node changeset="5288876" id="757860928" lat="41.9747374" lon="-87.6920102" timestamp="2010-07-22T16:16:51Z" uid="26299" user="uboot" version="2" visible="true">
+  <tag k="amenity" v="fast_food" />
+  <tag k="cuisine" v="sausage" />
+  <tag k="name" v="Shelly's Tasty Freeze" />
+ </node>
+  <way changeset="20187382" id="258219703" timestamp="2014-01-25T02:01:54Z" uid="1219059" user="linuxUser16" version="1" visible="true">
+  <nd ref="2636086179" />
+  <nd ref="2636086178" />
+  <nd ref="2636086177" />
+  <nd ref="2636086176" />
+  <tag k="highway" v="service" />
+ </way>
+ <relation changeset="14326854" id="1557627" timestamp="2012-12-19T05:32:37Z" uid="939355" user="fredr" version="2" visible="true">
+  <member ref="1258927212" role="via" type="node" />
+  <member ref="110160127" role="from" type="way" />
+  <member ref="34073105" role="to" type="way" />
+  <tag k="restriction" v="only_right_turn" />
+  <tag k="type" v="restriction" />
+ </relation>
+</osm>

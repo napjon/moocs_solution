@@ -1,0 +1,358 @@
+
+In this blog, I want to perform Exploratory Data Analysis with Facebook dataset. This dataset contains almost 100,000 users and it varies from age, birthday,gender, to likes, mobile likes, etc..
+
+<!-- TEASER_END -->
+
+Well this isn't actually a real Facebook dataset. But this pseudo data is provided by Data  Analysts at Facebook. So  we can be assured it's as good as the real one. This Exploratory Data Analysis ranging from my experience from Udacity Course, Exploratory Data Analysis with R, in which I acquired the dataset. You should check it, it's really recommended course.
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.width=12, fig.height=8,
+               echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+pf <- read.csv('pseudo_facebook.tsv',sep='\t')
+```
+
+Here I generate the html using Knit HTML with Rstudio. the code is as given.
+
+#Overview
+
+Now, to get better at analyzing at the dataset, it's good to have all summary that we need to do this analysiz. First, I will do some basic summary to get better understand at the dataset. Here the dataset contain the words 'dob', which means data of birth.
+
+```{r}
+summary(pf)
+
+head(pf)
+```
+
+Lastly, we may want to plot each other variables against another so we can get a better insight.
+
+```{r}
+library(GGally)
+set.seed(1836)
+pf_subset <- pf[,c(2:15)]
+ggpairs(pf_subset[sample.int(nrow(pf_subset),1000),-1])
+```
+
+
+Now let's disscuss some of these graph.
+
+
+#Female vs Male
+
+As this dataset also contain the gender, I want to know every analysis that differentiate the male from the female. First let's take a look at each of the gender. Let's see the friend count for both female and male.
+
+```{r}
+by(pf$friend_count,pf$gender,summary)
+```
+
+The median of female is better than male, because the mean in female will drag the median lefwards of the graph. The median will resistance about the outliers(friend_count hight), because the average we can say that we at least try half of our data.
+
+#Number of years using Facebook vs number of users in examples.
+
+```{r}
+library(ggplot2)
+ggplot(aes(x = tenure/365), data =pf) + geom_histogram(binwidth = 0.25,color = 'black', fill = '#099DD9') + scale_x_continuous(breaks = seq(1,7,1) , limits = c(0,7)) + xlab('Number of years using Facebook') + ylab('Number of users in sample')
+
+```
+
+We see exponential growth of users in Facebook for the last 3 years. Adding the color, this graph will proceed as follows;
+
+Tenure range from 1-365 days. in this case, I want to take range from 0 to 1 This will give me range histogram, to make it more convenience to see. Then I bulk(binwidth) it in 0.25.
+
+Let's see users' age in this dataset.
+
+```{r}
+ggplot(aes(x = age), data =pf) + geom_histogram(binwidth=1) + scale_x_discrete(breaks=c(0,113,5))
+```
+
+For some people, they don't have friend, so the baselog10 of zero(friend_count) = 0, this will get me negative towards infinity which will disrupt this data. So to avoid this I increment all friend count by 1. Natural Log will set better normal distribution over outliers in this data. I also using sqrt to compare log based 10 to convert it to normal distribution.
+
+```{r}
+library(gridExtra)
+pl = ggplot(aes(x = friend_count), data = pf) + geom_histogram()
+pl2 = pl + scale_x_log10()
+pl3 = pl + scale_x_sqrt()
+grid.arrange(pl,pl2,pl3,ncol=1)
+```
+
+#Female vs Male Continue
+
+Now let's see which gender has likes by using web platform the most.
+
+```{r}
+ggplot(aes(x =www_likes, y = ..count../sum(..count..)),
+       data = subset(pf, !is.na(gender))) + geom_freqpoly(aes(color = gender)) +
+       scale_x_continuous(limits = c(0,500), breaks = seq(0,500,50))+
+       xlab('count for www_likes') + ylab('ratio on which gender')
+```
+
+The data seems to tell me that female likes more often than male. Let's test this by using different approach.
+
+```{r}
+by(pf$www_likes,pf$gender,sum)
+```
+
+And by using boxplot,
+
+```{r}
+ggplot(aes(y = friend_count, x = gender), data = subset(pf, !is.na(gender))) + 
+  geom_boxplot()  + scale_y_continuous(breaks = c(0,1000))
+```
+
+the boxplot specify that most of women has higher max friend_count than men
+
+
+#On average, who initiated more friendships in our sample: men or women?
+
+```{r}
+ggplot(aes(y = friendships_initiated, x = gender), data = subset(pf, !is.na(gender))) + 
+  geom_boxplot()  + coord_cartesian(ylim = c(0,150))
+
+by(pf$friendships_initiated, pf$gender, summary)
+```
+
+Here I see that women initiated more friendship than men. Boxplot should have more advantage than mere by-function, and summary split each of gender, because it gives me better sense how determining the outlier of data, and also the normal distribution.
+
+#Checking if the facebook mobile app is really benefit for the company
+
+```{r}
+pf$mobile_check_in <- ifelse(pf$mobile_likes > 0, 1, 0)
+pf$mobile_check_in <- factor(pf$mobile_check_in)
+sum(pf$mobile_check_in == 1)/length(pf$mobile_check_in)
+```
+
+With almost 65% user on mobile device, then I know why Facebook should make mobile app. It's very benefit for the company.
+
+Don't try to understand kinds of data that you have, but also what transformations can you made using your data. In this example I synthesize the data, rather than just mere naturallog/sqrt function
+
+#Identify the anomaly of the dataset
+
+```{r}
+ggplot(aes(x = age, y=friend_count), data = pf) + geom_point()
+```
+
+People below thirty would have more friends.there's some extreme where ages>90 (some maybe lying). 's also important to notice the outliers of our data, and make actions how to audit the data.
+
+The unusual way is because the Facebook has default first day as default drop down for day-birthday, we should expect the first day is surprisingly high.It may be the case when user just skip over detail, or keep maintaining their privacy. Whatever the case, it's imp
+ortant to look over these anomaly and understanding better about the data.
+ed data. Where people that have much larger income encoded in normal income in stackholder.
+
+
+#Overplotting
+
+ Overplotting means we can't exactly see what are the real plotting. In this case I want to have a plot represent on 20 plot As X(age) is discrete, only attribute point doesn't really describe age. So instead I using jitter. The warning of ommited missing values because I limit to only age 13-70.
+ 
+ 
+```{r}
+ggplot(aes(x = age, y=friend_count), data = pf) +
+  geom_point(alpha=1/20,
+             position= position_jitter(h = 0),
+             color = "orange") +
+  geom_line(stat = "summary", fun.y = mean)+
+  geom_line(stat="summary", fun.y = quantile, probs = 0.1,#10% of  users have ~f_count
+            linetype =2, color="blue")+
+  geom_line(stat="summary", fun.y = quantile, probs = 0.9,#90% of  users have ~f_count
+            linetype =2, color="blue")+
+  coord_cartesian(xlim=c(13,70), ylim=c(0,1000))
+```
+
+We can see more distributed in the plot. Also keep in mind alpha=1/20 in geom means it will take 20 points in that coordinat to make it completely black. By doing this I know that most of users(in block of black) seen as age over 30 has below 1000 average friends.
+
+We have some jitter at age 69 majority of users in facebook is below age 30, and have some normal distribution Whereas age beyond 70 have some peak upside down(either true or users lying.
+
+
+#Age and Friend Count
+
+In the plot earlier, we can see that the age is a discrete value. I can't make continuous to line graphic to measure the the age and relative friend count. To to this, I have to create a new variable. I have to make the age continuous by including their birthmonth. This birthmonth (variable dob_month) would make it continuous, ranging from 1-12, quantified from 0-1.
+
+```{r}
+pf$age_with_months <- pf$age + (1.0 - pf$dob_month/12)
+```
+
+Next, I create a new dataframe, so I don't mess up with the original.
+
+```{r}
+library(dplyr)
+age_months_groups <- group_by(pf, age_with_months)
+pf.fc_by_age_months <- summarise(age_months_groups,
+                                 friend_count_mean = mean(friend_count),
+                                 friend_count_median = median(friend_count),
+                                 n = n())
+pf.fc_by_age_months <- arrange(pf.fc_by_age_months, age_with_months)
+head(pf.fc_by_age_months)
+```
+
+You can see that I have synthesized a new dataframe and have continuous age shown by age_with_months variable. Now let's plot this.
+
+```{r}
+ggplot(aes(y=friend_count_mean,x=age_with_months),
+       data=filter(pf.fc_by_age_months, age_with_months<=71))+
+  geom_line()
+```
+
+Now we have continuous age and see that age 70 peak as outliers. To give summary of this plot, I drawn 3 different plot each with different kind of summary. From this we know that as the best summary of this plot.
+
+```{r}
+
+age_groups <- group_by(pf,age)
+pf.fc_by_age <-summarise(age_groups,
+          friend_count_mean = mean(friend_count),
+          friend_count_median = median(friend_count),
+          n = n())
+
+
+p1 <- ggplot(aes(age,friend_count_mean), data =subset(pf.fc_by_age, age<=71)) +
+  geom_line()+
+  geom_smooth()
+
+
+p2 <-  ggplot(aes(y=friend_count_mean,x=age_with_months),
+       data=filter(pf.fc_by_age_months, age_with_months<=71))+
+  geom_line()+
+  geom_smooth()
+
+p3 <- ggplot(aes(y= friend_count, x = round(age/5)*5),
+             data=subset(pf, age<= 71))+
+  geom_line(stat="summary", fun.y = mean)
+  
+
+library(gridExtra)
+## Loading required package: grid
+grid.arrange(p1,p2,p3,ncol=1)
+```
+
+Keep in mind that this is just descriptive statistics, as opposed to inferential statistics. From this plot, we can't infer that as people get older they have less friend_count.
+
+# Female vs Male Continue
+
+```{r}
+ggplot(aes(x = gender, y = age),
+       data = subset(pf, !is.na(gender))) +geom_boxplot()+
+  stat_summary(fun.y = mean, geom = "point", shape =4 )
+```
+ 
+notice from boxplot, that women has more number, with median beyond 30
+
+
+```{r}
+ggplot(aes(x = age, y = friend_count),
+       data= subset(pf, !is.na(gender)))+
+  geom_line(aes(color=gender), stat="summary", fun.y = median)
+
+pf.fc_by_age_gender <- group_by(pf,age,gender) %>%
+  filter(!is.na(gender))%>%
+  summarise(median_friend_count = median(friend_count),
+            mean_friend_count = mean(friend_count),
+            n=n())%>%
+  #Earlier we use groupby age,gender. because gender need to be avoided, remove one layer
+  #by using ungroup, and arrange by age
+  ungroup()%>% 
+  arrange(age)
+head(pf.fc_by_age_gender)
+```
+
+Now by this plot we know plotting in range of ages with different gender. We also spot that younger people tend to have more friend. Now you may want to ask different question. By how many ratio women have friend compare to men?
+
+```{r}
+library(reshape2)
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender,
+                                  age~gender,#formula,left=value that kept,right=column that retain
+                                  value.var='median_friend_count')
+head(pf.fc_by_age_gender.wide)
+
+```
+
+```{r}
+ggplot(aes(x=age, y = female/male),
+      data=pf.fc_by_age_gender.wide)+
+   geom_line()+
+   geom_hline(aes(yintercept=1),linetype=2)
+```
+
+Pseudo Facebook may stated that, many people join from various other countries have tendencies male having lower count than female. These shows us that for younger women, they tend to have almost twice friend count than male.
+
+
+```{r}
+pf$year_joined <- floor(2014 - pf$tenure/365)
+pf$year_joined.bucket <- cut(pf$year_joined, breaks=c(2004,2009,2011,2012,2014))
+ggplot(aes(x = age, y = friend_count),
+       data = subset(pf, !is.na(year_joined.bucket)))+
+  geom_line(aes(color=year_joined.bucket), stat='summary', fun.y = median)
+```
+
+In this plot, now we observe 3 variables, using x=friend_count, y=age, and year_joined.bucket as categorical variables. Notice how people in older join(tenure) have more friend count than who join later.
+
+```{r}
+ggplot(aes(x = age, y = friend_count),
+       data = subset(pf, !is.na(year_joined.bucket)))+
+  geom_line(aes(color=year_joined.bucket), stat='summary', fun.y = mean)+
+  geom_line(fun.y = mean, stat='summary', linetype=2)
+```
+
+Now by plotting these, we know that the mean graph isn't entirely artifact.
+So we want to ask another question. how many friend count the user have each day?
+
+# Friendships Initiated.
+
+Now this is what we want to ask, Who's in the year categorical bucket, initiate friends more than the others?
+
+```{r}
+ggplot(aes(x = tenure, y = friendships_initiated/tenure),
+       data = subset(pf, tenure>1))+
+  geom_line(aes(color=year_joined.bucket))
+```
+
+These shows that people with more tenure typically have less friendships_initiated.
+Let's see if we can clean the noise and have a better insight.
+
+
+
+```{r}
+
+p1 <- ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+
+p2 <- ggplot(aes(x = 90 * round(tenure / 90), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+p3 <-  ggplot(aes(x = tenure, y = friendships_initiated / tenure),
+       data = subset(pf, tenure >= 1)) +
+  geom_smooth(aes(color = year_joined.bucket))
+grid.arrange(p1,p2,p3,ncol=1)
+```
+
+By doing smoothing, we also get better understanding about the data. Be caution though, as it also destroy some data that we may want to pay attention.
+
+Many interesting variables are derived from two or more others. For example, we might wonder how much of a person's network on a service like Facebook the user actively initiated. Two users with the same degree (or number of friends) might be very different if one initiated most of those connections on the service, while the other initiated very few. So it could be useful to consider this proportion of existing friendships that the user initiated. This might be a good predictor of how active a user is compared with their peers, or other traits, such as personality (i.e., is this person an extrovert?).
+
+
+```{r}
+library(ggplot2)
+pf <- transform(pf, prop_initiated=friendships_initiated/friend_count)
+pf <- transform(pf,year_joined=floor(2014-tenure/365))
+pf <- transform(pf, year_joined.bucket = cut(year_joined,c(2004,2009,2011,2012,2014)))
+ggplot(aes(x=tenure,y=prop_initiated),
+       data=pf)+
+  geom_line(aes(color=year_joined.bucket),
+            stat="summary",
+            fun.y = median)
+
+```
+
+Let's see if we can smooth these.
+
+```{r}
+ggplot(aes(x=tenure,y=prop_initiated),
+       data=pf)+
+  geom_smooth(aes(color=year_joined.bucket))
+```
+
+So why people that late join initiate more friendships? Because people with late join, tends to have friends that already on facebook. So they're catching up by invite their friends.When they first join, they were asked to invite friends that they do know, instead earlier when facebook didn't implement such system. Facebook has become very famous, and sort of de facto standard for social network. Nonetheless, people (must) use facebook for engaging their network. Like google, many apps nowadays in smartphone using facebook account to quickly login into their account.
