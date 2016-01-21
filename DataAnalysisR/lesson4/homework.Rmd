@@ -1,0 +1,181 @@
+
+setting up library
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+```
+
+Scatter Plot between price and x in diamonds data set
+```{r}
+data(diamonds)
+names(diamonds)
+ggplot(aes(x=x,y=price),data=subset(diamonds, x > 3 & x < 9))+
+  geom_point(alpha = 1/20)
+```
+
+Observation
+the majority of x is between 3-9
+the maximum of price is less than 2000
+It seems like monotonic increasing function
+
+Correlation
+```{r}
+cor.test(diamonds$price,diamonds$x)
+cor.test(diamonds$price,diamonds$y)
+cor.test(diamonds$price,diamonds$z)
+```
+scatter plot price vs depth
+```{r}
+ggplot(aes(x=depth, y = price), data =diamonds)+
+  geom_point()
+```
+
+Adjustment
+```{r}
+ggplot(aes(x=depth, y = price), data =diamonds)+
+  geom_point(alpha = 1/100)+
+  scale_x_continuous(breaks = seq(50,70,2))
+```
+Correlation
+```{r}
+cor.test(diamonds$depth, diamonds$price)
+```
+Scatter plot, omit top 1%
+```{r}
+p1 <- ggplot(aes(x=carat,y=price),data=diamonds)+
+  geom_point(stat= "summary", fun.y = quantile, probs = 0.99)
+p2 <- ggplot(aes(x=carat,y=price),data=diamonds)+
+  geom_point(stat= "summary", fun.y = quantile, probs = 0.01)
+grid.arrange(p1,p2,ncol=1)
+```
+price vs volume
+```{r}
+diamonds$volume <- (diamonds$x*diamonds$y)*diamonds$z
+ggplot(aes(x=volume,y=price), data=diamonds)+
+  geom_point()
+```
+#Observations
+seems like linear increase and we can find highly correlation betwen volume and price
+Did you notice some outliers? Some volumes are 0! There's an expensive diamond with a volume near 4000, and a cheaper diamond with a volume near 900.
+
+You can find out how many diamonds have 0 volume by using count(diamonds$volume == 0). The count() function comes with the plyr package.
+
+Note: You need to run this command in R to unload the plyr package. detach("package:plyr", unload=TRUE) The plyr package will conflict with the dplyr package in later exercises.
+
+Depending on your investigation, it may or may not be important for you to understand how outliers, like these, came to be in your data.
+
+
+Correlation price vs volume
+```{r}
+subdiammondsbyvol <-subset(diamonds,volume>0 & volume <= 800) 
+cor.test(subdiammondsbyvol$price, subdiammondsbyvol$volume)
+```
+# Subset the data to exclude diamonds with a volume
+# greater than or equal to 800. Also, exclude diamonds
+# with a volume of 0. Adjust the transparency of the
+# points and add a linear model to the plot. (See the
+# Instructor Notes or look up the documentation of
+# geom_smooth() for more details about smoothers.)
+
+# We encourage you to think about this next question and
+# to post your thoughts in the discussion section.
+
+# Do you think this would be a useful model to estimate
+# the price of diamonds? Why or why not?
+
+```{r}
+ggplot(aes(x=volume, y=price), data=subdiammondsbyvol)+
+  geom_point(alpha=1/20)+
+  geom_smooth()+
+  ggsave("volpricediamond.jpg")
+  #stat_smooth(method="loess",size=1)
+  #geom_line(stat="summary", fun.y = mean)
+```
+Use the function dplyr package
+ to create a new data frame containing
+info on diamonds by clarity.
+
+ Name the data frame diamondsByClarity
+
+ The data frame should contain the following
+ variables in this order.
+
+       (1) mean_price
+       (2) median_price
+       (3) min_price
+      (4) max_price
+       (5) n
+
+ where n is the number of diamonds in each
+level of clarity.
+```{r}
+library(dplyr)
+diamondsByClarity<-diamonds%.%
+  group_by(clarity)%.%
+  summarise(mean_price=mean(price),
+            median_price=median(price),
+            min_price=min(price),
+            max_price=max(price),
+            n=n())
+  
+```
+#Bar Charts of Mean Price
+```{r}
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+
+p1 <- ggplot(aes(x=clarity,y=mean_price),data=diamonds_mp_by_clarity)+
+  geom_bar(stat="identity")
+p2 <- ggplot(aes(x=color,y=mean_price),data=diamonds_mp_by_color)+
+  geom_bar(stat="identity")
+grid.arrange(p1,p2,ncol=1)
+```
+Observation
+we can't measure the price by clarity, it's categorical, so we plot in bar chart
+As opposite, the the color, can be measured by the color, we plot in histogram
+
+We think something odd is going here. These trends seem to go against our intuition.
+
+Mean price tends to decrease as clarity improves. The same can be said for color.
+
+We encourage you to look into the mean price across cut.
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+```{r}
+diamonds_by_cut <- group_by(diamonds, cut)
+diamonds_mp_by_cut <- summarise(diamonds_by_cut, mean_price = mean(price))
+
+ggplot(aes(x=cut,y=mean_price),data=diamonds_mp_by_cut)+
+  geom_bar(stat="identity")
+```
+#Gapminder Revisited
+```{r}
+cp <- read.csv("cell phone total.csv", header = T, row.names=1)
+Total <- colSums(cp, na.rm=T)
+Average <- colMeans(cp,na.rm = T)
+df_y <- as.data.frame(cbind(Total,Average))
+df_y$Year <- as.numeric(substr(rownames(df_y),start=2,stop=5))
+p1 <- ggplot(aes(x=Year,y=Total),data=df_y)+ geom_point()+
+  xlim(1965,2011)
+p2 <- ggplot(aes(x=Year,y=Average),data=df_y)+geom_point()+
+  xlim(1965,2011)
+  
+grid.arrange(p1,p2,ncol=1)
+```
+```{r}
+cp <- read.csv("cell phone total.csv", header = T, row.names=1)
+df_y <- as.data.frame(colMeans(cp,na.rm = T))
+df_y$Year <- as.numeric(substr(rownames(df_y),start=2,stop=5))
+ggplot(aes(x=Year,y=Average),data=df_y)+geom_point()+
+  xlim(1965,2011)+
+  ggtitle('Average/Year of Cell Phone Owned')+
+  ggsave('avgpycpplot.jpg')
+
+```
+
+

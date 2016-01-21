@@ -1,0 +1,187 @@
+Lesson 3
+========================================================
+
+***
+
+### What to Do First?
+Notes:
+```{r}
+library(ggplot2)
+```
+
+***
+
+### Pseudo-Facebook User Data
+Notes:
+
+```{r Pseudo-Facebook User Data}
+#list.files()
+pf = read.csv('pseudo_facebook.tsv', sep = '\t')
+#names(pf)
+#summary(pf)
+```
+
+***
+
+### Histogram of Users' Birthdays
+Notes:
+
+***
+
+#### What are some things that you notice about this histogram?
+Response:
+if two or more variable, use, facet_grid
+
+The unusual way is because the Facebook has default first day as default drop down for day-birthday, we should expect the first day is surprisingly high.It may be the case when user just skip over detail, or keep maintaining their privacy. Whatever the case, it's important to look over these anomaly and understanding better about the data.
+
+Outliers/anomaly We may have to handle outliers differently depending our data.
+The data maybe accurate.accurate data in extereme case, like someone may definitely tweet thousands time a day.
+Or in other case,extreme valeu replace normal value. For example there's top-coded data. Where people that have much larger income encoded in normal income in stackholder.
+
+binwith =x is default descrete. It's good to know that the average of people saw post in each of person expect is below their quarter friend_count
+
+This is how we split the graph by gender, we subset our data to only include gender provided
+use eiher the case:
+data = subset(pf, !is.na(gender))
+data =na.omit(pf)#Omit all the na values
+***
+
+```{r, echo=FALSE}
+#names(pf)
+ggplot(aes(x = friend_count), data = subset(pf, !is.na(gender))) + geom_histogram(binwidth = 25) + scale_x_continuous(limits = c(0,1000), breaks = seq(0,1000,50)) + facet_wrap(~gender)
+#names(pf)
+ge```
+count man vs female
+Can also use by function takes categorical,list/indices,function
+```{r}
+#table(pf$gender)
+by(pf$friend_count,pf$gender,summary)
+```
+
+The median of female is better than male, because the mean in female will drag the median lefwards of the graph.
+The median will resistance about the outliers(friend_count hight), because the average we can say that we at least try half of our data.
+
+Adding the Color
+This graph will proceed as follows
+Tenure range from 1-365 days. in this case, we want to take range from 0 to 1
+This will give us range histogram, to make it more convenience to see, we bulk(binwidth) it in 0.25
+```{r}
+#ggplot(aes(x = tenure/365), data =pf) + geom_histogram(binwidth = 0.25,color = 'black', fill = '#099DD9') + scale_x_continuous(breaks = seq(1,7,1) , limits = c(0,7))
+```
+
+Creating label
+
+```{r}
+ggplot(aes(x = tenure/365), data =pf) + geom_histogram(binwidth = 0.25,color = 'black', fill = '#099DD9') + scale_x_continuous(breaks = seq(1,7,1) , limits = c(0,7)) + xlab('Number of years using Facebook') + ylab('Number of users in sample')
+```
+
+create histogram of ages
+```{r}
+ggplot(aes(x = age), data =pf) + geom_histogram(binwidth=1) + scale_x_discrete(breaks=c(0,113,5))
+#summary(pf$age)
+#summary(pf$friend_count)
+#summary(log10(pf$friend_count + 1))
+```
+For some people, they don't have friend, so the baselog10 of zero(friend_count) = 0, this will get us -Inf which will disrupt our data. So to avoid this we increment all friend count by 1
+Natural Log will set better normal distribution over outliers in our data
+Setting gridExtra
+```{r, echo=FALSE}
+library(gridExtra)
+p1 = ggplot(aes(x = friend_count), data = pf) + geom_histogram()
+p2 = ggplot(aes(x = log10(friend_count+1)), data = pf) + geom_histogram()
+p3 = ggplot(aes(x = sqrt(friend_count)), data = pf) + geom_histogram()
+grid.arrange(p1,p2,p3)
+
+```
+
+Another for doing different distribution
+
+```{r}
+#pl = ggplot(aes(x = friend_count), data = pf) + geom_histogram()
+#pl2 = pl + scale_x_log10()
+#pl3 = pl + scale_x_sqrt()
+#grid.arrange(p1,p2,ncol=2)
+```
+
+```{r}
+#countScale = ggplot(aes(x = log10(friend_count+1)), data = pf) + geom_histogram()
+#logScale = pl2
+#grid.arrange(countScale,logScale, ncol =2)
+```
+
+Coloring frequency polygon by gender
+```{r}
+ggplot(aes(x =www_likes, y = ..count../sum(..count..)),
+       data = subset(pf, !is.na(gender))) + geom_freqpoly(aes(color = gender)) +
+       scale_x_continuous(limits = c(0,500), breaks = seq(0,500,50))+
+       xlab('count for www_likes') + ylab('ratio on which gender')
+#names(pf)
+#summary(pf$www_likes)
+#pf$www_likes
+```
+
+Compare the gender by who likes www_likes the most
+```{r}
+#summary(subset(pf,gender))
+#table(pf$gender, pf$www_likes)
+#table(pf$www_likes)
+#count(pf)
+by(pf$www_likes,pf$gender,sum)
+```
+
+### Box Plots, Quartiles, and Friendships
+Notes:
+Boxplot use to plot the data with to know what are the range of min-q1-q2-q3-max in the sorting.
+By plotting this, we know the ouliers from each of the gender
+```{r Box Plots, Quartiles, and Friendships}
+ggplot(aes(y = friend_count, x = gender), data = subset(pf, !is.na(gender))) + 
+  geom_boxplot()  + scale_y_continuous(breaks = c(0,1000))
+#ggplot(aes(y = friend_count, x = gender), data = subset(pf, !is.na(gender))) + 
+#  geom_boxplot()  + coord_cartesian(ylim = c(0,1000))
+```
+
+#### On average, who initiated more friendships in our sample: men or women?
+Response:Because the boxplot specify that most of women has higher max friend_count than men
+#### Write about some ways that you can verify your answer.
+Response:
+```{r Friend Requests by Gender}
+ggplot(aes(y = friendships_initiated, x = gender), data = subset(pf, !is.na(gender))) + 
+  geom_boxplot()  + coord_cartesian(ylim = c(0,150))
+by(pf$friendships_initiated, pf$gender, summary)
+```
+
+Response:
+Boxplot should have more advange than mere by function summary split each of gender, 
+because it gives us better sense how determining the outlier of data, and also the normal distribution
+***
+
+### Getting Logical
+Notes:
+We can assign the new column, for this example assign 1 for user that using mobile(at least a like on mobile)
+With this we can actually create a new question. What are the ratio user using mobile 
+```{r Getting Logical}
+summary(pf$mobile_likes > 0)
+#mobile_check_in <- NA
+pf$mobile_check_in <- ifelse(pf$mobile_likes > 0, 1, 0)
+pf$mobile_check_in <- factor(pf$mobile_check_in)
+sum(pf$mobile_check_in == 1)/length(pf$mobile_check_in)
+
+#sum(pf$gender)
+#by(pf$mobile_check_in, pf$gender, sum)
+sum(pf$mobile_likes)
+```
+
+Response:
+With at least 65% user on mobile device, then we at lease know why we should make mobile app
+Don't try to understand kinds of data that we have, but also what transformations can we made using our data.
+In this example we use particular transformation(synthetic data?) rather than just mere naturallog/sqrt function
+***
+
+### Analyzing One Variable
+Reflection:
+We understand a plotting and different kind of plotting.
+We transform our data to normalize distribution or synthesize it to another kind of data.
+***
+
+Click **KnitHTML** to see all of your hard work and to have an html
+page of this lesson, your answers, and your notes!
